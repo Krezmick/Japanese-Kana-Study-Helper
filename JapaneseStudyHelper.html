@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kana Quiz (Hiragana & Katakana)</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #7B96B5;
+      padding: 2em;
+    }
+    #kana {
+      font-size: 6em;
+      margin: 20px;
+    }
+    input {
+      font-size: 1.2em;
+      padding: 5px;
+    }
+    #feedback {
+      margin-top: 15px;
+      font-size: 1.2em;
+    }
+    #score {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .options {
+      margin: 15px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>Japanese Kana Quiz</h1>
+
+  <div class="options">
+    <label><input type="checkbox" id="hiragana" checked> Hiragana</label>
+    <label><input type="checkbox" id="katakana" checked> Katakana</label>
+    <button onclick="startQuiz()">Start</button>
+  </div>
+
+  <div id="kana">あ</div>
+  <input id="answer" type="text" placeholder="Type romaji (e.g. a, ka, shi)" autofocus>
+  <button onclick="checkAnswer()">Submit</button>
+  <div id="feedback"></div>
+  <div id="score">Score: 0 / 0</div>
+
+  <script>
+    // Hiragana set
+    const hiragana = [
+      {char: "あ", romaji: "a"}, {char: "い", romaji: "i"}, {char: "う", romaji: "u"}, {char: "え", romaji: "e"}, {char: "お", romaji: "o"},
+      {char: "か", romaji: "ka"}, {char: "き", romaji: "ki"}, {char: "く", romaji: "ku"}, {char: "け", romaji: "ke"}, {char: "こ", romaji: "ko"},
+      {char: "さ", romaji: "sa"}, {char: "し", romaji: "shi"}, {char: "す", romaji: "su"}, {char: "せ", romaji: "se"}, {char: "そ", romaji: "so"},
+      {char: "た", romaji: "ta"}, {char: "ち", romaji: "chi"}, {char: "つ", romaji: "tsu"}, {char: "て", romaji: "te"}, {char: "と", romaji: "to"},
+      {char: "な", romaji: "na"}, {char: "に", romaji: "ni"}, {char: "ぬ", romaji: "nu"}, {char: "ね", romaji: "ne"}, {char: "の", romaji: "no"},
+      {char: "は", romaji: "ha"}, {char: "ひ", romaji: "hi"}, {char: "ふ", romaji: "fu"}, {char: "へ", romaji: "he"}, {char: "ほ", romaji: "ho"},
+      {char: "ま", romaji: "ma"}, {char: "み", romaji: "mi"}, {char: "む", romaji: "mu"}, {char: "め", romaji: "me"}, {char: "も", romaji: "mo"},
+      {char: "や", romaji: "ya"}, {char: "ゆ", romaji: "yu"}, {char: "よ", romaji: "yo"},
+      {char: "ら", romaji: "ra"}, {char: "り", romaji: "ri"}, {char: "る", romaji: "ru"}, {char: "れ", romaji: "re"}, {char: "ろ", romaji: "ro"},
+      {char: "わ", romaji: "wa"}, {char: "を", romaji: "wo"}, {char: "ん", romaji: "n"}
+    ];
+
+    // Katakana set
+    const katakana = [
+      {char: "ア", romaji: "a"}, {char: "イ", romaji: "i"}, {char: "ウ", romaji: "u"}, {char: "エ", romaji: "e"}, {char: "オ", romaji: "o"},
+      {char: "カ", romaji: "ka"}, {char: "キ", romaji: "ki"}, {char: "ク", romaji: "ku"}, {char: "ケ", romaji: "ke"}, {char: "コ", romaji: "ko"},
+      {char: "サ", romaji: "sa"}, {char: "シ", romaji: "shi"}, {char: "ス", romaji: "su"}, {char: "セ", romaji: "se"}, {char: "ソ", romaji: "so"},
+      {char: "タ", romaji: "ta"}, {char: "チ", romaji: "chi"}, {char: "ツ", romaji: "tsu"}, {char: "テ", romaji: "te"}, {char: "ト", romaji: "to"},
+      {char: "ナ", romaji: "na"}, {char: "ニ", romaji: "ni"}, {char: "ヌ", romaji: "nu"}, {char: "ネ", romaji: "ne"}, {char: "ノ", romaji: "no"},
+      {char: "ハ", romaji: "ha"}, {char: "ヒ", romaji: "hi"}, {char: "フ", romaji: "fu"}, {char: "ヘ", romaji: "he"}, {char: "ホ", romaji: "ho"},
+      {char: "マ", romaji: "ma"}, {char: "ミ", romaji: "mi"}, {char: "ム", romaji: "mu"}, {char: "メ", romaji: "me"}, {char: "モ", romaji: "mo"},
+      {char: "ヤ", romaji: "ya"}, {char: "ユ", romaji: "yu"}, {char: "ヨ", romaji: "yo"},
+      {char: "ラ", romaji: "ra"}, {char: "リ", romaji: "ri"}, {char: "ル", romaji: "ru"}, {char: "レ", romaji: "re"}, {char: "ロ", romaji: "ro"},
+      {char: "ワ", romaji: "wa"}, {char: "ヲ", romaji: "wo"}, {char: "ン", romaji: "n"}
+    ];
+
+    let pool = [];
+    let currentKana;
+    let correct = 0;
+    let total = 0;
+
+    function startQuiz() {
+      pool = [];
+      if (document.getElementById("hiragana").checked) pool = pool.concat(hiragana);
+      if (document.getElementById("katakana").checked) pool = pool.concat(katakana);
+
+      if (pool.length === 0) {
+        alert("Please select at least one script!");
+        return;
+      }
+
+      correct = 0;
+      total = 0;
+      document.getElementById("score").textContent = "Score: 0 / 0";
+      newKana();
+    }
+
+    function newKana() {
+      currentKana = pool[Math.floor(Math.random() * pool.length)];
+      document.getElementById("kana").textContent = currentKana.char;
+      document.getElementById("answer").value = "";
+      document.getElementById("answer").focus();
+    }
+
+    function checkAnswer() {
+      const userInput = document.getElementById("answer").value.trim().toLowerCase();
+      total++;
+      if (userInput === currentKana.romaji) {
+        correct++;
+        document.getElementById("feedback").textContent = "✅ Correct!";
+        document.getElementById("feedback").style.color = "green";
+      } else {
+        document.getElementById("feedback").textContent = `❌ Wrong! It was "${currentKana.romaji}".`;
+        document.getElementById("feedback").style.color = "red";
+      }
+      document.getElementById("score").textContent = `Score: ${correct} / ${total}`;
+      setTimeout(newKana, 1000);
+    }
+
+    // Allow pressing Enter
+    document.getElementById("answer").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        checkAnswer();
+      }
+    });
+
+    // Initialize with both sets
+    startQuiz();
+  </script>
+</body>
+</html>
