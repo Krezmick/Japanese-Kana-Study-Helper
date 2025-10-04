@@ -112,7 +112,7 @@
         document.getElementById("feedback").style.color = "green";
       } else {
         document.getElementById("feedback").textContent = `❌ Wrong! It was "${currentKana.romaji}".`;
-        document.getElementById("feedback").style.color = "red";
+        document.getElementById("feedback").style.color = "black";
       }
       document.getElementById("score").textContent = `Score: ${correct} / ${total}`;
       setTimeout(newKana, 1000);
@@ -129,4 +129,5 @@
     startQuiz();
   </script>
 </body>
+
 </html>
